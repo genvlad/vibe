@@ -1,6 +1,6 @@
 # Vibe
 
-Collection of Python tasks from a course on AI-assisted programming (Anthropic API).
+Collection of Python tasks from a course on AI-assisted programming (Google Gemini API).
 
 ## Structure
 
@@ -20,7 +20,7 @@ Each task lives in its own folder at the repo root:
 
 ```bash
 cd <task-name>
-cp .env.example .env        # fill in ANTHROPIC_API_KEY
+cp .env.example .env        # fill in GEMINI_API_KEY
 uv run --with-requirements requirements.txt python main.py
 ```
 
