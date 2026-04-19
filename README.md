@@ -28,4 +28,4 @@ uv run --with-requirements requirements.txt python main.py
 
 | Task | Description | Run |
 | --- | --- | --- |
-| _(none yet)_ | | |
+| `lekcia1` | Simple Gemini tool use example that squares the number 4 via a Python function. | `cd lekcia1 && uv run --with-requirements requirements.txt python main.py` |
