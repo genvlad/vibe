@@ -8,7 +8,6 @@ Each task lives in its own folder at the repo root:
 
 ```
 <task-name>/
-├── spec.md             # specification
 ├── main.py             # implementation
 ├── requirements.txt
 ├── .env.example
