@@ -1,31 +1,31 @@
 # Vibe
 
-Zbierka Python úloh z kurzu programovania s umelou inteligenciou (Anthropic API).
+Collection of Python tasks from a course on AI-assisted programming (Anthropic API).
 
-## Štruktúra
+## Structure
 
-Každá úloha je v samostatnom priečinku v rôte repa:
+Each task lives in its own folder at the repo root:
 
 ```
-<nazov-ulohy>/
-├── spec.md             # zadanie
-├── main.py             # implementácia
+<task-name>/
+├── spec.md             # specification
+├── main.py             # implementation
 ├── requirements.txt
 ├── .env.example
 ├── tests/
 └── test-report.md
 ```
 
-## Spustenie úlohy
+## Running a task
 
 ```bash
-cd <nazov-ulohy>
-cp .env.example .env        # doplň ANTHROPIC_API_KEY
+cd <task-name>
+cp .env.example .env        # fill in ANTHROPIC_API_KEY
 uv run --with-requirements requirements.txt python main.py
 ```
 
-## Zoznam úloh
+## Tasks
 
-| Úloha | Popis | Spustenie |
+| Task | Description | Run |
 | --- | --- | --- |
-| _(zatiaľ žiadna)_ | | |
+| _(none yet)_ | | |
