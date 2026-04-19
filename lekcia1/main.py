@@ -1,111 +1,72 @@
-from __future__ import annotations
-
 import os
-from pathlib import Path
-from typing import Any
 
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-
-
-MODEL_NAME = "gemini-2.5-flash"
-PROMPT = "Daj mi druhu mocninu cisla 4."
-
-
-def load_env_file(env_path: Path) -> None:
-    if not env_path.exists():
-        return
-
-    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-
-        key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip())
 
 
 def square_number(number: int) -> int:
     return number * number
 
 
-def build_square_tool() -> types.Tool:
-    function = types.FunctionDeclaration(
-        name="square_number",
-        description="Returns the square of a number.",
-        parameters_json_schema={
+load_dotenv()
+
+api_key = os.environ.get("GEMINI_API_KEY")
+if not api_key:
+    raise RuntimeError("Missing GEMINI_API_KEY.")
+
+tools = [
+    {
+        "name": "square_number",
+        "description": "Use this function to get the square of a number.",
+        "parameters": {
             "type": "object",
             "properties": {
                 "number": {
                     "type": "integer",
-                    "description": "The number to square.",
+                    "description": "The number to square, e.g. 4",
                 }
             },
             "required": ["number"],
         },
-    )
-    return types.Tool(function_declarations=[function])
+    }
+]
 
+client = genai.Client(api_key=api_key)
+gemini_tools = types.Tool(function_declarations=tools)
+config = types.GenerateContentConfig(tools=[gemini_tools])
+prompt = "Daj mi druhu mocninu cisla 4."
 
-def run_square_example(client: genai.Client) -> str:
-    tool = build_square_tool()
-    user_prompt_content = types.Content(
-        role="user",
-        parts=[types.Part.from_text(text=PROMPT)],
-    )
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=prompt,
+    config=config,
+)
 
-    first_response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=[user_prompt_content],
-        config=types.GenerateContentConfig(tools=[tool]),
-    )
+tool_call = response.candidates[0].content.parts[0].function_call
+tool_result = square_number(int(tool_call.args["number"]))
 
-    if not first_response.function_calls:
-        raise RuntimeError("The model did not request a tool call.")
+tool_response = types.Content(
+    role="tool",
+    parts=[
+        types.Part.from_function_response(
+            name=tool_call.name,
+            response={"result": tool_result},
+        )
+    ],
+)
 
-    function_call = first_response.function_calls[0]
-    if function_call.name != "square_number":
-        raise RuntimeError(f"Unexpected tool call: {function_call.name}")
+final_response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=[
+        prompt,
+        response.candidates[0].content,
+        tool_response,
+    ],
+    config=config,
+)
 
-    result = square_number(int(function_call.args["number"]))
-    function_response_part = types.Part.from_function_response(
-        name=function_call.name,
-        response={"result": result},
-    )
-    function_response_content = types.Content(
-        role="tool",
-        parts=[function_response_part],
-    )
-
-    final_response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=[
-            user_prompt_content,
-            first_response.candidates[0].content,
-            function_response_content,
-        ],
-        config=types.GenerateContentConfig(tools=[tool]),
-    )
-
-    if not final_response.text:
-        raise RuntimeError("The model returned an empty final response.")
-
-    return final_response.text
-
-
-def create_client() -> genai.Client:
-    load_env_file(Path(__file__).with_name(".env"))
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        raise RuntimeError("Missing GEMINI_API_KEY in lekcia1/.env or environment.")
-    return genai.Client(api_key=api_key)
-
-
-def main() -> None:
-    client = create_client()
-    answer = run_square_example(client)
-    print(answer)
-
-
-if __name__ == "__main__":
-    main()
+print("--- Response Tool call: ---")
+print(tool_call)
+print("--- Final response: ---")
+print(final_response.text)

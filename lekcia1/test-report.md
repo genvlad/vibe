@@ -15,7 +15,7 @@ uv run --with pytest --with-requirements lekcia1/requirements.txt pytest lekcia1
 Výsledok:
 
 ```text
-3 passed, 1 warning
+2 passed, 1 warning
 ```
 
 Integračný beh:
@@ -27,14 +27,17 @@ uv run --with-requirements lekcia1/requirements.txt python lekcia1/main.py
 Výsledok:
 
 ```text
+--- Response Tool call: ---
+id=None args={'number': 4} name='square_number' partial_args=None will_continue=None
+--- Final response: ---
 Druhá mocnina čísla 4 je 16.
 ```
 
 ## Čo bolo overené
 
 - funkcia `square_number(4)` vracia hodnotu `16`
-- načítanie `GEMINI_API_KEY` z `.env` súboru funguje
-- základný manual tool use tok funguje:
+- skript načíta `GEMINI_API_KEY` cez `load_dotenv()`
+- jednoduchý tool use tok funguje:
   - prvé volanie modelu
   - zachytenie tool callu `square_number`
   - vykonanie nástroja v Pythone
@@ -44,7 +47,11 @@ Druhá mocnina čísla 4 je 16.
 
 ## Poznámka
 
-Unit testy používajú mockovaný klient a nerobia skutočné volanie Gemini API.
+Skript:
+- `load_dotenv()`
+- zoznam `tools`
+- priame `generate_content(...)`
+- výpis tool callu aj finálnej odpovede
 
 Samostatne bol overený aj ostrý integračný beh proti Gemini API.
 
